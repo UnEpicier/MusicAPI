@@ -1,0 +1,31 @@
+{
+	"name": "musicapi",
+	"version": "1.0.0",
+	"description": "Custom Music API",
+	"main": "App.js",
+	"scripts": {
+		"start": "nodemon ."
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/UnEpicier/MusicAPI.git"
+	},
+	"keywords": [
+		"API",
+		"musics",
+		"songs"
+	],
+	"author": "Un Épicier",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/UnEpicier/MusicAPI/issues"
+	},
+	"homepage": "https://github.com/UnEpicier/MusicAPI#readme",
+	"dependencies": {
+		"express": "^4.18.2",
+		"mariadb": "^3.0.2"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.20"
+	}
+}
