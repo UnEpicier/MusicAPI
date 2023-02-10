@@ -7,6 +7,8 @@ const router = require("./router");
 const app = express();
 const port = 3000;
 
+app.use(express.static(`${process.cwd()}/assets/`));
+
 app.use(router);
 
 app.listen(port, () => {

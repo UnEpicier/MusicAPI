@@ -30,8 +30,36 @@ router.get("/api/artists/name/:name", (req, res) => {
 	return res.json(artist);
 });
 
-// Creation Date
-// firstAlbum : param can be full date, month, year or day
-// members: param can be full name (space = %20), first name or last name
+router.get("/api/artists/creation/:date", (req, res) => {
+	const artists = JSON.parse(fs.readFileSync("data.json", "utf-8"));
+
+	const artist = artists.find(
+		(artist) => artist.creationDate === parseInt(req.params.date)
+	);
+	if (!artist) {
+		return res.status(404).json({ error: "Artist not found" });
+	}
+	return res.json(artist);
+});
+
+router.get("/api/artists/members/:name", (req, res) => {
+	const artists = JSON.parse(fs.readFileSync("data.json", "utf-8"));
+	const result = [];
+
+	for (let i = 0; i < artists.length; i++) {
+		for (let j = 0; j < artists[i].members.length; j++) {
+			if (
+				artists[i].members[j].includes(
+					req.params.name.replace("%20", " ")
+				)
+			) {
+				result.push(artists[i]);
+				found = true;
+				break;
+			}
+		}
+	}
+	return res.json(result);
+});
 
 module.exports = router;
