@@ -9,42 +9,48 @@ router.get("/api/artists", (_, res) => {
 router.get("/api/artists/id/:id", (req, res) => {
 	const artists = JSON.parse(fs.readFileSync("data.json", "utf-8"));
 
-	const artist = artists.find(
-		(artist) => artist.id === parseInt(req.params.id)
-	);
-	if (!artist) {
-		return res.status(404).json({ error: "Artist not found" });
+	const results = [];
+
+	for (let i = 0; i < artists.length; i++) {
+		if (artists[i].id === parseInt(req.params.id)) {
+			results.push(artists[i]);
+		}
 	}
-	return res.json(artist);
+
+	return res.json(results);
 });
 
 router.get("/api/artists/name/:name", (req, res) => {
 	const artists = JSON.parse(fs.readFileSync("data.json", "utf-8"));
 
-	const artist = artists.find(
-		(artist) => artist.name.toLowerCase() === req.params.name.toLowerCase()
-	);
-	if (!artist) {
-		return res.status(404).json({ error: "Artist not found" });
+	const results = [];
+
+	for (let i = 0; i < artists.length; i++) {
+		if (artists[i].name.toLowerCase().includes(req.params.name)) {
+			results.push(artists[i]);
+		}
 	}
-	return res.json(artist);
+
+	return res.json(results);
 });
 
 router.get("/api/artists/creation/:date", (req, res) => {
 	const artists = JSON.parse(fs.readFileSync("data.json", "utf-8"));
 
-	const artist = artists.find(
-		(artist) => artist.creationDate === parseInt(req.params.date)
-	);
-	if (!artist) {
-		return res.status(404).json({ error: "Artist not found" });
+	const results = [];
+
+	for (let i = 0; i < artists.length; i++) {
+		if (artists[i].creationDate === parseInt(req.params.date)) {
+			results.push(artists[i]);
+		}
 	}
-	return res.json(artist);
+
+	return res.json(results);
 });
 
 router.get("/api/artists/members/:name", (req, res) => {
 	const artists = JSON.parse(fs.readFileSync("data.json", "utf-8"));
-	const result = [];
+	const results = [];
 
 	for (let i = 0; i < artists.length; i++) {
 		for (let j = 0; j < artists[i].members.length; j++) {
@@ -53,13 +59,13 @@ router.get("/api/artists/members/:name", (req, res) => {
 					req.params.name.replace("%20", " ")
 				)
 			) {
-				result.push(artists[i]);
+				results.push(artists[i]);
 				found = true;
 				break;
 			}
 		}
 	}
-	return res.json(result);
+	return res.json(results);
 });
 
 module.exports = router;
