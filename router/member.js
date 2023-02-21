@@ -19,76 +19,80 @@ router.get("/api/artists/member/:name/:type/:token", async (req, res) => {
 		return res.status(400).json({ error: "Invalid Query: name" });
 	}
 
-	await pool.getConnection().then((conn) => {
-		conn.query("SELECT COUNT(*) AS count FROM user WHERE token = ?", [
-			req.params.token,
-		]).then((rows) => {
-			if (rows[0].count == 0) {
-				return res.status(401).json({ error: "Invalid token" });
-			}
+	await pool.getConnection().then(async (conn) => {
+		await conn
+			.query("SELECT COUNT(*) AS count FROM user WHERE token = ?", [
+				req.params.token,
+			])
+			.then(async (rows) => {
+				if (rows[0].count == 0) {
+					return res.status(401).json({ error: "Invalid token" });
+				}
 
-			let formatted = "";
-			if (req.params.type === "start") {
-				formatted = `${req.params.name}%`;
-			} else if (req.params.type === "end") {
-				formatted = `%${req.params.name}`;
-			} else if (req.params.type === "contain") {
-				formatted = `%${req.params.name}%`;
-			} else {
-				return res.status(400).json({ error: "Invalid Query: type" });
-			}
+				let formatted = "";
+				if (req.params.type === "start") {
+					formatted = `${req.params.name}%`;
+				} else if (req.params.type === "end") {
+					formatted = `%${req.params.name}`;
+				} else if (req.params.type === "contain") {
+					formatted = `%${req.params.name}%`;
+				} else {
+					return res
+						.status(400)
+						.json({ error: "Invalid Query: type" });
+				}
 
-			conn.query(
-				"SELECT DISTINCT group_id FROM `member` WHERE member_name LIKE ?",
-				[`%${req.params.name}%`]
-			)
-				.then((rows) => {
-					for (let i = 0; i < rows.length; i++) {
-						result.push({
-							id: rows[i].group_id,
-						});
+				await conn
+					.query(
+						"SELECT DISTINCT group_id FROM `member` WHERE member_name LIKE ?",
+						[`%${req.params.name}%`]
+					)
+					.then(async (rows) => {
+						for (let i = 0; i < rows.length; i++) {
+							result.push({
+								id: rows[i].group_id,
+							});
 
-						conn.query("SELECT * FROM `group` WHERE id = ?", [
-							rows[i].group_id,
-						]).then((rows) => {
-							result[i].image = rows[0].image;
-							result[i].name = rows[0].name;
-							result[i].creationDate = parseInt(
-								rows[0].creation_date
-							);
-							result[i].firstAlbum = rows[0].first_album;
-						});
-					}
-				})
-				.then(() => {
-					for (let i = 0; i < result.length; i++) {
-						conn.query(
-							"SELECT * FROM `member` WHERE group_id = ?",
-							[result[i].id]
-						).then((rows) => {
-							result[i].members = [];
-							for (let j = 0; j < rows.length; j++) {
-								result[i].members.push(rows[j].member_name);
-							}
+							await conn
+								.query("SELECT * FROM `group` WHERE id = ?", [
+									rows[i].group_id,
+								])
+								.then((rows) => {
+									result[i].image = rows[0].image;
+									result[i].name = rows[0].name;
+									result[i].creationDate = parseInt(
+										rows[0].creation_date
+									);
+									result[i].firstAlbum = rows[0].first_album;
+								});
+						}
+					})
+					.then(async () => {
+						let i = 0;
+						while (i < result.length - 1) {
+							await conn
+								.query(
+									"SELECT * FROM `member` WHERE group_id = ?",
+									[result[i].id]
+								)
+								.then((rows) => {
+									result[i].members = [];
+									for (let j = 0; j < rows.length; j++) {
+										result[i].members.push(
+											rows[j].member_name
+										);
+									}
+								});
 
-							if (i === result.length - 1) {
-								return res.json(result);
-							}
-						});
-					}
-				});
-		});
+							i++;
+						}
+
+						if (i == result.length - 1) {
+							return res.json(result);
+						}
+					});
+			});
 	});
 });
-
-/*
-result.push({
-	id: rows[i].id,
-	image: rows[i].image,
-	name: rows[i].name,
-	creationDate: parseInt(rows[i].creation_date),
-	firstAlbum: rows[i].first_album,
-});
-*/
 
 module.exports = router;

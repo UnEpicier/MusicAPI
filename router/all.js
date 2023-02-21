@@ -43,12 +43,11 @@ router.get("/api/artists/:token", async (req, res) => {
 							for (let j = 0; j < rows.length; j++) {
 								result[i].members.push(rows[j].member_name);
 							}
-
-							if (i === result.length - 1) {
-								return res.json(result);
-							}
 						});
 					}
+				})
+				.then(() => {
+					return res.json(result);
 				});
 		});
 	});
