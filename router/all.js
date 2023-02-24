@@ -15,42 +15,49 @@ const pool = mariadb.createPool({
 
 router.get("/api/artists/:token", async (req, res) => {
 	let result = [];
-	await pool.getConnection().then((conn) => {
-		conn.query("SELECT COUNT(*) AS count FROM user WHERE token = ?", [
-			req.params.token,
-		]).then((rows) => {
-			if (rows[0].count == 0) {
-				return res.status(401).json({ error: "Invalid token" });
-			}
-			conn.query("SELECT * FROM `group`")
-				.then((rows) => {
-					for (let i = 0; i < rows.length; i++) {
-						result.push({
-							id: rows[i].id,
-							image: rows[i].image,
-							name: rows[i].name,
-							creationDate: parseInt(rows[i].creation_date),
-							firstAlbum: rows[i].first_album,
-						});
-					}
-				})
-				.then(() => {
-					for (let i = 0; i < result.length; i++) {
-						conn.query(
-							"SELECT * FROM `member` WHERE group_id = ?",
-							[parseInt(result[i].id)]
-						).then((rows) => {
-							result[i].members = [];
-							for (let j = 0; j < rows.length; j++) {
-								result[i].members.push(rows[j].member_name);
-							}
-						});
-					}
-				})
-				.then(() => {
-					return res.json(result);
-				});
-		});
+	await pool.getConnection().then(async (conn) => {
+		await conn
+			.query("SELECT COUNT(*) AS count FROM user WHERE token = ?", [
+				req.params.token,
+			])
+			.then(async (rows) => {
+				if (rows[0].count == 0) {
+					return res.status(401).json({ error: "Invalid token" });
+				}
+				await conn
+					.query("SELECT * FROM `group`")
+					.then((rows) => {
+						for (let i = 0; i < rows.length; i++) {
+							result.push({
+								id: rows[i].id,
+								image: rows[i].image,
+								name: rows[i].name,
+								creationDate: parseInt(rows[i].creation_date),
+								firstAlbum: rows[i].first_album,
+							});
+						}
+					})
+					.then(async () => {
+						for (let i = 0; i < result.length; i++) {
+							await conn
+								.query(
+									"SELECT * FROM `member` WHERE group_id = ?",
+									[parseInt(result[i].id)]
+								)
+								.then((rows) => {
+									result[i].members = [];
+									for (let j = 0; j < rows.length; j++) {
+										result[i].members.push(
+											rows[j].member_name
+										);
+									}
+								});
+						}
+					})
+					.then(() => {
+						return res.json(result);
+					});
+			});
 	});
 });
 
