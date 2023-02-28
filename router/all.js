@@ -13,6 +13,10 @@ const pool = mariadb.createPool({
 	charset: "utf8mb4",
 });
 
+if (process.env.URL.endsWith("/")) {
+	process.env.URL = process.env.URL.slice(0, -1);
+}
+
 router.get("/api/artists/:token", async (req, res) => {
 	let result = [];
 	await pool.getConnection().then(async (conn) => {
@@ -30,7 +34,7 @@ router.get("/api/artists/:token", async (req, res) => {
 						for (let i = 0; i < rows.length; i++) {
 							result.push({
 								id: rows[i].id,
-								image: rows[i].image,
+								image: `${process.env.URL}${rows[i].image}`,
 								name: rows[i].name,
 								creationDate: parseInt(rows[i].creation_date),
 								firstAlbum: rows[i].first_album,

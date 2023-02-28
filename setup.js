@@ -4,6 +4,16 @@ const fs = require("fs");
 
 dotenv.config();
 
+// Check if all env variables are set
+const vars = ["PORT", "MYSQL_HOST", "MYSQL_USER", "MYSQL_PASS", "MYSQL_DB"];
+
+vars.forEach((v) => {
+	if (!process.env[v] || process.env[v].length == 0) {
+		console.log(`\x1b[1m\x1b[31mMissing env variable: ${v}\x1b[0m`);
+		process.exit(1);
+	}
+});
+
 const pool = mariadb.createPool({
 	host: process.env.MYSQL_HOST,
 	user: process.env.MYSQL_USER,

@@ -13,6 +13,10 @@ const pool = mariadb.createPool({
 	charset: "utf8mb4",
 });
 
+if (process.env.URL.endsWith("/")) {
+	process.env.URL = process.env.URL.slice(0, -1);
+}
+
 router.get("/api/artists/member/:name/:type/:token", async (req, res) => {
 	let result = [];
 
@@ -59,7 +63,9 @@ router.get("/api/artists/member/:name/:type/:token", async (req, res) => {
 									rows[i].group_id,
 								])
 								.then((rows) => {
-									result[i].image = rows[0].image;
+									result[
+										i
+									].image = `${process.env.URL}${rows[i].image}`;
 									result[i].name = rows[0].name;
 									result[i].creationDate = parseInt(
 										rows[0].creation_date
